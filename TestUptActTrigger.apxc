@@ -1,0 +1,26 @@
+@isTest
+public class TestUptActTrigger {
+    static TestMethod void TestTrigger(){
+        //Create Test Data
+        list<Contact> ContactList = new list<Contact>();
+        Account Acc = new Account(Name = 'Test Account');
+        insert Acc;
+        for(Integer i=0; i<5; i++ ){
+        	Contact C = new Contact(LastName = 'Test Contact'+i, Contact_Cost__c = 1000, AccountID = Acc.Id);    
+        	ContactList.add(C);
+        }
+        
+        insert ContactList;
+        //Test Case1: Test for Insert Event
+        Account Acc1 = [SELECT ID, Acc_Cost__c FROM Account WHERE Name = 'Test Account'];
+        system.assertNotEquals(1000, Acc1.Acc_Cost__c);
+        system.assertEquals(5000, Acc1.Acc_Cost__c);
+        
+        //Test Case2: Test for Delete Event
+        Contact C1 = [SELECT ID, Name, AccountID FROM Contact WHERE AccountID = :Acc1.ID LIMIT 1];
+        delete C1;
+        Account Acc2 = [SELECT ID, Acc_Cost__c FROM Account WHERE Name = 'Test Account'];
+		    system.assertNotEquals(1000, Acc2.Acc_Cost__c);
+        system.assertEquals(4000, Acc2.Acc_Cost__c);
+    }
+}
